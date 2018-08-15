@@ -12,7 +12,7 @@ services:
   - docker
 before_script:
   # Log in to docker hub
-  - docker login -u $DOCKER_USER -p $DOCKER_PASS
+  - echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
   # Get version number for this build
   - VERSION=$VERSION_MAJOR.$VERSION_MINOR.$TRAVIS_BUILD_NUMBER
 script:
