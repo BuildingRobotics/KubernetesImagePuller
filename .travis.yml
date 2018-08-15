@@ -1,0 +1,26 @@
+env:
+  global:
+    - VERSION_MAJOR=1
+    - VERSION_MINOR=0
+    # DOCKER_USER
+    - secure: "mk4h8JGonjmxMunwVmw6Bz7Bx6o5f1gDKltGN6gU0pR+lbqqbhhdhSsTicTgDhnUH6CHvmNb50oV7/MDRlFTGbfMsMOGsr6byoRB+NmPp2J5AHvZa/wrZjsnUuFz/gHFetwDjINn++LyHt19s2NrxuE3Nd0WogD5a1yBQwm4J3Szs4ZywHAGdxMrU0texsoiuEMje6/2m6UrwZr1ICwgyZkAjc+UwFwrr2moMNJmYkNxno86cgveWeyhFAyCKaEuE3y2f1eEWbUUOIwD5N4O1FViVrCDJsN7y2prn3V4W4POrZjRUJNLEv1Yb0KzLD8OorgBSI+b49NoG3m9HVfqM20XTXcQ3u4S8YtAD//ed4m03HbiD0fRIYyWXororVAFIb6vJhFy6g5WikGqcwypwwI/3Qc3Q8+LcHlae84mxAEL986av6gNc9u2y36CAG+taKcrRevrOPYqafhYm2K6wzPfsEvYGD/mq4jEKjLENKsMlDvXHJ0JdQB9YEwJBuAgzoBdMQwk7bU9E5DhWJhRVqetXvfRSScgmeQ97RG0ZGOXTF2KdmIqvp6AFq5SnqZ73MI/PRR/ius4vCVelE6BtdkdFHTx3nK+uUNVo9KOuujfNu6EKZt5HPM3aLPvlqQRqRfaBtEQeTw/JK8Odhm9YZ35Y6t0iH6yBpxVhTBavJY="
+    # DOCKER_PASS
+    - secure: "XXrpkueYwABOVpLmff3zb3YBmH4N+I9yYSbcjb5Ee5UP0rqdawUu/GNcczapVuVtMtq7Jw84mFk/60u5RGBtpNw0x9T7aEVXd0Lw0nZsb0ac3Pa+/UeCEwi+yy5niKnoSmVWe6/Is0jyPYa55+nVdL0DXZa/Br+c2in/rIpe2I46uHSfOcWLvF/3ZOCRx/EzCTb9rKxlWQ686/wYw7LBaIFMgYiwvm9lx9lMs49E4K3XgtxRb0lu6jnzuzPUV1QvS7xgM9Q/zB+ynrlFbfZC6OFF6A7sNOmBdmFrSnIqIoutGZzQZW4xXYs+M5k7btEiVqjJWK7JziG6yt/2FGf9t0hlwnPdVgWXAlYkQ9Oa4ZpqF75wu/QXjuPxAUdY4hT8VWSJ9vRKBx/fkLiXUPHjuvw0stZdQ2PaPOPCbnzPX+dWrlyk87429LInpKWuTI4cgoEulWUlNJEL0oO9RKmT6wEGH4C4nWTuQBjNjV4vDV2Ne5afyxLa5xZc5xrqqJ9mDDvtpbt4UduuSDkOEHfKgcm6a4+d2z8BrazElQM3o+6ao6wU3aOgnp+3fkT1Y0zUo5XEvbdp4/qhPeJyzk9wBb012DQ606BShK3ksFc8wle6iW4D60su7JagOlLTUeiYsNuuEMlkYBQyeDzPiLq544owH8wd6fkayDdPrSfkBZ8="
+    # Where to push Docker image
+    - DOCKER_REPO=comfy/imagepuller
+services:
+  - docker
+before_script:
+  # Log in to docker hub
+  - docker login -u $DOCKER_USER -p $DOCKER_PASS
+  # Get version number for this build
+  - VERSION=$VERSION_MAJOR.$VERSION_MINOR.$TRAVIS_BUILD_NUMBER
+script:
+  # Build and tag the docker image
+  - docker build -t $DOCKER_REPO:$VERSION .
+  - test "${TRAVIS_BRANCH}" = "master" && docker tag $DOCKER_REPO:$VERSION $DOCKER_REPO:latest
+after_success:
+  # Show built images
+  - docker images
+  # Push to Docker Hub
+  - docker push $DOCKER_REPO
