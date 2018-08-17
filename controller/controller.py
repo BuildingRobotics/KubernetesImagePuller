@@ -29,22 +29,34 @@ if __name__ == "__main__":
 
     logging.info('Waiting for Image CRD to come up...')
     while True:
+        # Watch for Image objects
         stream = watch.Watch().stream(crds.list_cluster_custom_object,
                                       DOMAIN, 'v1', 'images')
         for event in stream:
             try:
+                # Ignore everything except the creation of new Image objects
                 if event['type'] != 'ADDED':
                     continue
-                # TODO: Check if this node's status includes SchedulingDisabled
-                # and if so, continue
                 obj = event['object']
                 name = obj['metadata']['name']
                 image = obj.get('spec', {}).get('image')
                 if not image:
-                    logging.info('Ignoring %s; spec.image not found', name)
+                    logging.info('image/%s: Ignoring; spec.image not found',
+                                 name)
                     continue
-                logging.info('Pulling image %s', image)
+                logging.info('image/%s: Pulling %s', name, image)
                 docker_client.images.pull(image)
-                # TODO: Update object with this node's name
+                # Update the object with this node's name
+                logging.info('image/%s: Adding %s to nodes list',
+                             name, node_name)
+                patch = {
+                    'spec': {
+                        'nodes': {
+                            node_name: 'pull_complete'
+                        }
+                    }
+                }
+                crds.patch_cluster_custom_object(DOMAIN, 'v1', 'images',
+                                                 name, patch)
             except Exception as e:
                 logging.error(e, exc_info=True)
