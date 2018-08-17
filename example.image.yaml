@@ -1,6 +1,6 @@
 apiVersion: developers.comfyapp.com/v1
 kind: Image
 metadata:
-  name: test
+  name: example
 spec:
-  image: comfy/comfy:version
+  image: example/image:tag
