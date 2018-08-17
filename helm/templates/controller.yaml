@@ -1,0 +1,33 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  labels:
+    k8s-app: {{ .Release.Name }}
+  name: {{ .Release.Name }}
+  namespace: kube-system
+spec:
+  template:
+    metadata:
+      labels:
+        k8s-app: {{ .Release.Name }}
+      name: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: imagepuller
+        image: comfy/imagepuller:1.0.8
+        env:
+        - name: IMAGEPULLER_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: DOCKER_USER
+          value: {{ .Values.DOCKER_USER }}
+        - name: DOCKER_PASS
+          value: {{ .Values.DOCKER_PASS }}
+        volumeMounts:
+        - name: docker
+          mountPath: /var/run/docker.sock
+      volumes:
+      - name: docker
+        hostPath:
+          path: /var/run/docker.sock
