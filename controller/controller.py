@@ -24,6 +24,8 @@ if __name__ == "__main__":
 
     # Get Docker client
     docker_client = docker.from_env()
+    docker_client.login(username=os.getenv('DOCKER_USER'),
+                        password=os.getenv('DOCKER_PASS'))
 
     logging.info('Waiting for Image CRD to come up...')
     while True:
